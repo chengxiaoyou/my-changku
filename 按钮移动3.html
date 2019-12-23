@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+		
+		#box {
+			width: 100px;
+			height: 100px;
+			left: 0;
+			background-color: red;
+			position: absolute;
+		}
+		
+		#box2 {
+			width: 100px;
+			height: 100px;
+			left: 0;
+			top: 200px;
+			background-color: yellow;
+			position: absolute;
+		}
+	</style>
+
+	<body>
+		<button id="btn1">点击按钮向右移动</button>
+		<button id="btn2">点击按钮向左移动</button>
+		<button id="btn3">点击按钮box2向右移动</button>
+		<button id="btn4">点击按钮box2向下移动</button>
+		<br />
+		<br />
+		<div id="box"></div>
+		<div id="box2"></div>
+
+		<script type="text/javascript">
+			var btn1 = document.getElementById("btn1");
+			var box = document.getElementById("box");
+			var btn2 = document.getElementById("btn2");
+			var btn3 = document.getElementById("btn3");
+			var btn4 = document.getElementById("btn4");
+			//var timer;
+
+			function getStyle(obj, name) { //封装函数：获取当前指定元素的当前样式 
+				if(window.getComputedStyle) {
+					//正常浏览器的方法
+					return getComputedStyle(obj, null)[name];
+				} else {
+					//兼容IE8方法
+					return obj.currentStyle[name];
+				}
+			}
+
+			/*
+			 * 参数：
+			 * obj：要执行动画的对象
+			 * attr:修改元素的样式：width，height，top，left
+			 * target：执行动画的目标位置
+			 * speed：移动的速度（正数向右移动，负数向左移动）
+			 * fun：回调函数
+			 */
+			function move(obj, attr, target, speed, fun) { //封装为动画函数
+				var count = parseInt(getStyle(obj, "left"));
+				if(count > target) {
+					speed = -speed;
+				}
+				clearInterval(obj.timer);
+				//向执行动画的对象中添加一个timer属性，用来保存它自己的定时器标识
+				obj.timer = setInterval(function() {
+					var oldValue = parseInt(getStyle(obj, attr));
+					var newValue = oldValue + speed;
+					if(speed < 0 && newValue < target || speed > 0 && newValue > target) {
+						newValue = target;
+					}
+					obj.style[attr] = newValue + "px";
+					if(newValue == target) {
+						clearInterval(obj.timer);
+						//动画执行完毕，调用回调函数
+						fun && fun(); //防止没有写最后一个回调函数的时候不报错
+					}
+
+				}, 30)
+			}
+
+			btn1.onclick = function() {
+				move(box, "left", 800, 30);
+			}
+			btn2.onclick = function() {
+				move(box, "width", 800, 30);
+			}
+			btn3.onclick = function() {
+				move(box2, "left", 800, 30);
+			}
+			btn4.onclick = function() {
+				move(box2, "left", 800, 30, function() {
+					move(box2, "top", 800, 30, function() {
+						move(box, "width", 800, 30);
+					});
+				});
+			}
+		</script>
+	</body>
+
+</html>
